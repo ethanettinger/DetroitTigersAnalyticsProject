@@ -115,7 +115,11 @@ pitches <- pitches %>%
 plot_movement <- function(data, pitcher) {
   data %>%
     filter(PitcherId == pitcher, !is.na(PitchType)) %>%
-    ggplot(aes(x = HorizBreakIn, y = IVBIn, color = PitchType)) +
+    ggplot(aes(x = HorizBreakIn, y = IVBIn, color = PitchType, text = paste0(PitchType,
+                                                                             "<br>Velo: ", round(ReleaseSpeed, 1), " mph",
+                                                                             "<br>Spin: ", round(ReleaseSpinRate), " rpm",
+                                                                             "<br>IVB: ", round(IVBIn, 1), " in",
+                                                                             "<br>HB: ", round(HorizBreakIn, 1), " in"))) +
     geom_hline(yintercept = 0, color = "grey70") +
     geom_vline(xintercept = 0, color = "grey70") +
     geom_point(size = 3, alpha = 0.8) +
@@ -145,7 +149,12 @@ plot_location <- function(data, pitcher) {
   ggplot(d, aes(x = TrajectoryLocationX, y = TrajectoryLocationZ)) +
     annotate("rect", xmin = -0.83, xmax = 0.83, ymin = zone_bottom, ymax = zone_top,
              fill = NA, color = "black", linewidth = 1) +
-    geom_point(aes(color = Outcome, shape = PitchType), size = 3, alpha = 0.85) +
+    geom_point(aes(color = Outcome, shape = PitchType, text = paste0(PitchType, " (", round(ReleaseSpeed, 1), " mph)",
+                                                                     "<br>Result: ", PitchCall,
+                                                                     "<br>Count: ", Balls, "-", Strikes,
+                                                                     "<br>Inning: ", Inning,
+                                                                     "<br>IVB: ", round(IVBIn, 1), " in",
+                                                                     "<br>HB: ", round(HorizBreakIn, 1))), size = 3, alpha = 0.85) +
     scale_color_manual(values = outcome_colors) +
     coord_fixed(xlim = c(-2.5, 2.5), ylim = c(0, 5)) +
     facet_wrap(~ BatterSide, labeller = labeller(BatterSide = c(L = "vs. LHB", R = "vs. RHB"))) +
