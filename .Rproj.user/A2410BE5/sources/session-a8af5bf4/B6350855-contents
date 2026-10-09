@@ -1,5 +1,5 @@
 library(dplyr)
-
+library(ggplot2)
 #----------READ IN DATA----------
 pitches <- read.csv("AnalyticsQuestionnairePitchData.csv")
 
@@ -46,6 +46,7 @@ pitches <- pitches %>%
 
 colSums(pitches[, c("IsStrike", "IsSwing", "IsWhiff", "IsInPlay", "IsPAEnd", "InZone")])
 
+#----------FUNCTIONS----------
 #Summary Table For All Pitchers
 summarize_pitchers <- function(data) {
   data %>%
@@ -68,9 +69,7 @@ summarize_pitchers <- function(data) {
     arrange(desc(Pitches))
 }
 
-pitcher_summary <- summarize_pitchers(pitches)
-print(pitcher_summary, width = Inf)
-
+#Arsenal Table For Each Pitcher
 summarize_arsenal <- function(data) {
   data %>%
     filter(!is.na(PitchType)) %>%
@@ -94,5 +93,68 @@ summarize_arsenal <- function(data) {
     arrange(PitcherId, desc(Pitches))
 }
 
-arsenal <- summarize_arsenal(pitches)
-print(filter(arsenal, PitcherId == 1), width = Inf)
+#----------GRAPHS----------
+pitch_colors <- c(
+  FF = "#D22D49",  
+  SI = "#FE9D00",  
+  FC = "#933F2C", 
+  SL = "#EEE716",  
+  CU = "#00D1ED",  
+  KC = "#6236CD",  
+  CH = "#1DBE3A"   
+)
+
+pitches <- pitches %>%
+  mutate(Outcome = case_when(
+    IsInPlay ~ "Hit Into Play",
+    IsStrike ~ "Strike",
+    TRUE     ~ "Ball"
+  ))
+
+#Movement Chart
+plot_movement <- function(data, pitcher) {
+  data %>%
+    filter(PitcherId == pitcher, !is.na(PitchType)) %>%
+    ggplot(aes(x = HorizBreakIn, y = IVBIn, color = PitchType)) +
+    geom_hline(yintercept = 0, color = "grey70") +
+    geom_vline(xintercept = 0, color = "grey70") +
+    geom_point(size = 3, alpha = 0.8) +
+    scale_color_manual(values = pitch_colors) +
+    coord_fixed(xlim = c(-25, 25), ylim = c(-25, 25)) +
+    labs(title = paste("Pitch Movement: Pitcher", pitcher),
+         x = "Horizontal Break (in)", y = "Induced Vertical Break (in)",
+         color = "Pitch") +
+    theme_minimal(base_size = 13) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5))
+}
+
+plot_movement(pitches, 1)
+
+outcome_colors <- c(
+  "Strike"        = "#1F77B4",
+  "Ball"          = "grey60",
+  "Hit Into Play" = "#D62728"
+)
+
+#Location Plot
+plot_location <- function(data, pitcher) {
+  d <- filter(data, PitcherId == pitcher, !is.na(TrajectoryLocationX))
+  zone_bottom <- mean(d$StrikeZoneBottom)
+  zone_top    <- mean(d$StrikeZoneTop)
+  
+  ggplot(d, aes(x = TrajectoryLocationX, y = TrajectoryLocationZ)) +
+    annotate("rect", xmin = -0.83, xmax = 0.83, ymin = zone_bottom, ymax = zone_top,
+             fill = NA, color = "black", linewidth = 1) +
+    geom_point(aes(color = Outcome, shape = PitchType), size = 3, alpha = 0.85) +
+    scale_color_manual(values = outcome_colors) +
+    coord_fixed(xlim = c(-2.5, 2.5), ylim = c(0, 5)) +
+    facet_wrap(~ BatterSide, labeller = labeller(BatterSide = c(L = "vs. LHB", R = "vs. RHB"))) +
+    labs(title = paste("Pitch Locations: Pitcher", pitcher),
+         x = "Horizontal Location (ft)", y = "Height (ft)",
+         color = "Result", shape = "Pitch") +
+    theme_minimal(base_size = 13) +
+    theme(plot.title = element_text(face = "bold", hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5))
+}
+
+plot_location(pitches, 1)

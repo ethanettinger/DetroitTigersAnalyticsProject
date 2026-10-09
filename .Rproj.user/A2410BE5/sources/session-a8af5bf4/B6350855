@@ -3,7 +3,7 @@
     "path": "~/Desktop/TigersAnalyticsProject/Global.R",
     "project_path": "Global.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "3591708870",
     "contents": "",
     "dirty": false,
     "created": 1791499559870.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "88,27",
-        "scrollLine": "72"
+        "cursorPosition": "150,24",
+        "scrollLine": "132"
     },
     "folds": "",
-    "lastKnownWriteTime": 1791502958,
+    "lastKnownWriteTime": 1791504935,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1791502958758,
+    "last_content_update": 1791504935454,
     "read_only": false,
     "read_only_alternatives": []
 }
